@@ -1,3 +1,6 @@
+library(dplyr)
+library(data.table)
+
 mapa <- function(ventas, proveedor_objetivo, particiones_pdvs, particiones_productos){
   columnas <- c(particiones_pdvs, particiones_productos, "tiene_proveedor")
 
