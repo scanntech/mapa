@@ -3,8 +3,8 @@ library(data.table)
 
 mapa <- function(ventas, proveedor_objetivo, particiones_pdvs, particiones_productos){
   columnas <- c(particiones_pdvs, particiones_productos, "tiene_proveedor")
-
-  rbind(
+  ventas[is.na(ventas)] <- "-"
+  result <- rbind(
     ventas[, c("tiene_proveedor", "imp_total_ticket") := .(fifelse(any(proveedor==proveedor_objetivo), 1, 0), sum(imp_vta)), by = "id_ticket"] %>%
       .[, imp_proveedor := fifelse(proveedor == proveedor_objetivo, imp_vta, 0)] %>%
       .[, .(
@@ -21,7 +21,10 @@ mapa <- function(ventas, proveedor_objetivo, particiones_pdvs, particiones_produ
         cant_pdvs = uniqueN(pdv_codigo),
         cant_tickets = uniqueN(id_ticket)
       ), by = c("tiene_proveedor", particiones_pdvs)] %>%
-      .[, c(particiones_productos) := .(rep("TODOS", length(particiones_productos)))]
-  )
-
+      .[, c(particiones_productos) := .("TODOS")]
+    )
+    
+    result[, names(result) := lapply(.SD, function(x) gsub("-", NA_character_, x))]
+    result
+    
 }
